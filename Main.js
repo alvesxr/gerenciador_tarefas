@@ -84,6 +84,23 @@ main.put('/tarefas/:id/prioridade', (req, res) => {
     res.json(tarefa);
 })
 
+
+
+// Rota para concluir uma tarefa
+main.patch('/tarefas/:id/concluir', (req, res) =>{
+    const {id} = req.params;
+    const tarefa = tarefas.find(t => t.id === parseInt(id));
+    if (!tarefa) {
+        return res.status(404).json({ message: 'Tarefa não encontrada' });
+    }
+    tarefa.marcarComoConcluida();
+    res.json(tarefa);
+})
+
+
+
+
+
 // onde vai rodar o servidor
 main.listen(3444, () => {
     console.log("Servidor rodando na porta 3444");
