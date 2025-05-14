@@ -99,6 +99,19 @@ main.patch('/tarefas/:id/concluir', (req, res) =>{
 
 
 
+// Rota para deletar uma tarefa
+main.delete('/tarefas/:id', (req, res) => {
+    const { id } = req.params;
+    const index = tarefas.findIndex(t => t.id === parseInt(id));
+    if (index === -1) {
+        return res.status(404).json({ message: 'Tarefa não encontrada' });
+    }
+    tarefas.splice(index, 1);
+    res.status(204).send();
+});
+
+
+
 
 
 // onde vai rodar o servidor
