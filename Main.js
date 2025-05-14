@@ -15,6 +15,7 @@ let tarefas = [];
 main.post('/tarefas', (req, res) => {
     const { titulo, descricao, dataCriacao, prioridade } = req.body;
     const novaTarefa = new Tarefa(titulo, descricao, dataCriacao, prioridade);
+    novaTarefa.id = Date.now(); // Gera um id único simples usando o timestamp atual
     tarefas.push(novaTarefa);
     res.status(201).json(novaTarefa);
 });
@@ -112,7 +113,15 @@ main.delete('/tarefas/:id', (req, res) => {
 
 
 
-
+// Rota para buscar por id
+main.get('/tarefas/:id', (req, res) => {
+    const { id } = req.params;
+    const tarefa = tarefas.find(t => t.id === parseInt(id));
+    if (!tarefa) {
+        return res.status(404).json({ message: 'Tarefa não encontrada' });
+    }
+    res.json(tarefa);
+});
 
 // onde vai rodar o servidor
 main.listen(3444, () => {
