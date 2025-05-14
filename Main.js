@@ -73,6 +73,16 @@ main.put('/tarefas/:id/dataCriacao', (req, res) =>{
 
 
 // Rota para editar a prioridade de uma tarefa
+main.put('/tarefas/:id/prioridade', (req, res) => {
+    const {id} = req.params;
+    const {prioridade} = req.body;
+    const tarefa = tarefas.find(t => t.id === parseInt(id));
+    if (!tarefa) {
+        return res.status(404).json({ message: 'Tarefa não encontrada' });
+    }
+    tarefa.editarPrioridade(prioridade);
+    res.json(tarefa);
+})
 
 // onde vai rodar o servidor
 main.listen(3444, () => {
