@@ -43,6 +43,21 @@ main.put('/tarefas/:id/titulo', (req, res) => {
     res.json(tarefa);
 });
 
+
+
+main.put('/tarefas/:id/descricao', (req, res) =>{
+    const { id} = req.params;
+    const { descricao} = req.body;
+    const tarefa = tarefas.find(t => t.id === parseInt(id));
+    if (!tarefa) {
+        return res.status(404).json({ message: 'Tarefa não encontrada' });
+    }
+    tarefa.editarDescricao(descricao);
+    res.json(tarefa);
+})
+
+
+
 // onde vai rodar o servidor
 main.listen(3444, () => {
     console.log("Servidor rodando na porta 3444");
