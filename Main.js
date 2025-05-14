@@ -45,6 +45,7 @@ main.put('/tarefas/:id/titulo', (req, res) => {
 
 
 
+// Rota para editar a descrição de uma tarefa
 main.put('/tarefas/:id/descricao', (req, res) =>{
     const { id} = req.params;
     const { descricao} = req.body;
@@ -57,6 +58,21 @@ main.put('/tarefas/:id/descricao', (req, res) =>{
 })
 
 
+
+// Rota para editar a data de criação de uma tarefa
+main.put('/tarefas/:id/dataCriacao', (req, res) =>{
+    const {id} = req.params;
+    const {dataCriacao} = req.body;
+    const tarefa = tarefas.find(t => t.id === parseInt(id));
+    if (!tarefa) {
+        return res.status(404).json({ message: 'Tarefa não encontrada' });
+    }
+    tarefa.editarDataCriacao(dataCriacao);
+    res.json(tarefa);
+})
+
+
+// Rota para editar a prioridade de uma tarefa
 
 // onde vai rodar o servidor
 main.listen(3444, () => {
