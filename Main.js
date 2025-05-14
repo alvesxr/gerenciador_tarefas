@@ -4,6 +4,9 @@ import Tarefa from '../Class/Tarefa.js';
 
 const main = express();
 main.use(express.json()); //para receber json
+main.use(cors()); //para permitir cors
+
+//rotas:
 
 // Array em memória para armazenar as tarefas
 let tarefas = [];
@@ -16,9 +19,28 @@ main.post('/tarefas', (req, res) => {
     res.status(201).json(novaTarefa);
 });
 
+
+
 // Rota para listar todas as tarefas
 main.get('/tarefas', (req, res) => {
     res.json(tarefas);
+});
+
+
+
+// Rota para editar o título de uma tarefa
+main.put('/tarefas/:id/titulo', (req, res) => {
+    const { id } = req.params;//pega o id da tarefa e usa no parametro
+    const { titulo } = req.body;//pega o titulo do body
+    
+    const tarefa = tarefas.find(t => t.id === parseInt(id));// procura a tarefa pelo id
+
+    if (!tarefa) {
+        return res.status(404).json({ message: 'Tarefa não encontrada' });
+    }
+
+    tarefa.editarTitulo(titulo);
+    res.json(tarefa);
 });
 
 // onde vai rodar o servidor
