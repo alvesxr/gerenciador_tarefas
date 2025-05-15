@@ -40,9 +40,25 @@ main.post('/tarefas',
 
 
 
-// Rota para listar todas as tarefas
+// Rota para listar todas as tarefas com filtros opcionais
 main.get('/tarefas', (req, res) => {
-    res.json(tarefas);
+    let resultado = [...tarefas]; // copia o array para não alterar o original
+
+    // Filtro por prioridade
+    if (req.query.prioridade) {
+        resultado = resultado.filter(t => t.prioridade === req.query.prioridade.toLowerCase());
+    }
+
+    // Filtro por concluída
+    if (req.query.concluida) {
+        if (req.query.concluida === 'true') {
+            resultado = resultado.filter(t => t.dataConclusao !== null);
+        } else if (req.query.concluida === 'false') {
+            resultado = resultado.filter(t => t.dataConclusao === null);
+        }
+    }
+
+    res.json(resultado);
 });
 
 
