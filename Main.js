@@ -24,7 +24,8 @@ main.post('/tarefas',
         //isIn verifica se o valor está dentro do array
     ],
     (req, res) => {
-        const errors = validationResult(req);
+        const errors = validationResult(req); //validationResult verifica se houve erro na validação
+        //validationResult(req) retorna um objeto com os erros encontrados
         if (!errors.isEmpty()){ //isEmpty verifica se o array está vazio
             return res.status(400).json({errors: errors.array()});
             //errors.array() retorna um array com os erros encontrados
@@ -47,7 +48,13 @@ main.get('/tarefas', (req, res) => {
 
 
 // Rota para editar o título de uma tarefa
-main.put('/tarefas/:id/titulo', (req, res) => {
+main.put('/tarefas/:id/titulo',
+    [body('titulo').notEmpty().withMessage('Titulo é obrigatório')],
+    (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
     const { id } = req.params;//pega o id da tarefa e usa no parametro
     const { titulo } = req.body;//pega o titulo do body
 
@@ -64,7 +71,13 @@ main.put('/tarefas/:id/titulo', (req, res) => {
 
 
 // Rota para editar a descrição de uma tarefa
-main.put('/tarefas/:id/descricao', (req, res) => {
+main.put('/tarefas/:id/descricao', 
+    [body('descricao').notEmpty().withMessage('Descrição é obrigatória')],
+    (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
     const { id } = req.params;
     const { descricao } = req.body;
     const tarefa = tarefas.find(t => t.id === parseInt(id));
@@ -78,29 +91,44 @@ main.put('/tarefas/:id/descricao', (req, res) => {
 
 
 // Rota para editar a data de criação de uma tarefa
-main.put('/tarefas/:id/dataCriacao', (req, res) => {
-    const { id } = req.params;
-    const { dataCriacao } = req.body;
-    const tarefa = tarefas.find(t => t.id === parseInt(id));
-    if (!tarefa) {
-        return res.status(404).json({ message: 'Tarefa não encontrada' });
+main.put('/tarefas/:id/dataCriacao',
+    [body('dataCriacao').notEmpty().withMessage('Data de criação é obrigatória')],
+    (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+        const { id } = req.params;
+        const { dataCriacao } = req.body;
+        const tarefa = tarefas.find(t => t.id === parseInt(id));
+        if (!tarefa) {
+            return res.status(404).json({ message: 'Tarefa não encontrada' });
+        }
+        tarefa.editarDataCriacao(dataCriacao);
+        res.json(tarefa);
     }
-    tarefa.editarDataCriacao(dataCriacao);
-    res.json(tarefa);
-})
+);
+
 
 
 // Rota para editar a prioridade de uma tarefa
-main.put('/tarefas/:id/prioridade', (req, res) => {
-    const { id } = req.params;
-    const { prioridade } = req.body;
-    const tarefa = tarefas.find(t => t.id === parseInt(id));
-    if (!tarefa) {
-        return res.status(404).json({ message: 'Tarefa não encontrada' });
+main.put('/tarefas/:id/prioridade',
+    [body('prioridade').isIn(['baixa', 'media', 'alta']).withMessage('Prioridade deve ser baixa, media ou alta')],
+    (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+        const { id } = req.params;
+        const { prioridade } = req.body;
+        const tarefa = tarefas.find(t => t.id === parseInt(id));
+        if (!tarefa) {
+            return res.status(404).json({ message: 'Tarefa não encontrada' });
+        }
+        tarefa.editarPrioridade(prioridade.toLowerCase());
+        res.json(tarefa);
     }
-    tarefa.editarPrioridade(prioridade);
-    res.json(tarefa);
-})
+);
 
 
 
@@ -144,3 +172,18 @@ main.get('/tarefas/:id', (req, res) => {
 main.listen(3444, () => {
     console.log("Servidor rodando na porta 3444");
 });
+
+/*sobre as validacoes:
+elas tinham que ser aplicadas nas rotas que recebem dados do usuário 
+no corpo da requisição (body)
+
+as rotas são:
+- POST /tarefas
+- PUT /tarefas/:id/titulo
+- PUT /tarefas/:id/descricao
+- PUT /tarefas/:id/dataCriacao
+- PUT /tarefas/:id/prioridade
+- PATCH /tarefas/:id/concluir
+obs: a rota de deletar não precisa de validação, pois não recebe dados do usuário
+a rota de buscar por id também não precisa de validação, pois o id é passado na url
+*/
