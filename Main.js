@@ -1,6 +1,9 @@
 import express from 'express'; //adicionar "type": "module" no package.json
 import cors from 'cors';
 import Tarefa from '../Class/Tarefa.js';
+import { body, validationResult } from 'express-validator'; // express-validator para validação de dados
+// /npm install express-validator para instalar
+
 
 const main = express();
 main.use(express.json()); //para receber json
@@ -12,13 +15,27 @@ main.use(cors()); //para permitir cors
 let tarefas = [];
 
 // Rota para criar uma nova tarefa
-main.post('/tarefas', (req, res) => {
-    const { titulo, descricao, dataCriacao, prioridade } = req.body;
-    const novaTarefa = new Tarefa(titulo, descricao, dataCriacao, prioridade);
-    novaTarefa.id = Date.now(); // Gera um id único simples usando o timestamp atual
-    tarefas.push(novaTarefa);
-    res.status(201).json(novaTarefa);
-});
+main.post('/tarefas',
+    [
+        body('titulo').notEmpty().withMessage('Titulo é obrigatório'),
+        body('descricao').notEmpty().withMessage('Descrição é obrigatória'),
+        body('dataCriacao').notEmpty().withMessage('Data de criação é obrigatória'),
+        body('prioridade').isIn(['baixa', 'media', 'alta']).withMessage('Prioridade deve ser baixa, media ou alta')
+        //isIn verifica se o valor está dentro do array
+    ],
+    (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()){ //isEmpty verifica se o array está vazio
+            return res.status(400).json({errors: errors.array()});
+            //errors.array() retorna um array com os erros encontrados
+        }
+        const { titulo, descricao, dataCriacao, prioridade } = req.body;
+        const prioridadeFormatada = prioridade.toLowerCase(); // Converte a prioridade para minúsculas
+        const novaTarefa = new Tarefa(titulo, descricao, dataCriacao, prioridadeFormatada);
+        novaTarefa.id = Date.now(); // Gera um id único simples usando o timestamp atual
+        tarefas.push(novaTarefa);
+        res.status(201).json(novaTarefa);
+    });
 
 
 
@@ -33,7 +50,7 @@ main.get('/tarefas', (req, res) => {
 main.put('/tarefas/:id/titulo', (req, res) => {
     const { id } = req.params;//pega o id da tarefa e usa no parametro
     const { titulo } = req.body;//pega o titulo do body
-    
+
     const tarefa = tarefas.find(t => t.id === parseInt(id));// procura a tarefa pelo id
 
     if (!tarefa) {
@@ -47,9 +64,9 @@ main.put('/tarefas/:id/titulo', (req, res) => {
 
 
 // Rota para editar a descrição de uma tarefa
-main.put('/tarefas/:id/descricao', (req, res) =>{
-    const { id} = req.params;
-    const { descricao} = req.body;
+main.put('/tarefas/:id/descricao', (req, res) => {
+    const { id } = req.params;
+    const { descricao } = req.body;
     const tarefa = tarefas.find(t => t.id === parseInt(id));
     if (!tarefa) {
         return res.status(404).json({ message: 'Tarefa não encontrada' });
@@ -61,9 +78,9 @@ main.put('/tarefas/:id/descricao', (req, res) =>{
 
 
 // Rota para editar a data de criação de uma tarefa
-main.put('/tarefas/:id/dataCriacao', (req, res) =>{
-    const {id} = req.params;
-    const {dataCriacao} = req.body;
+main.put('/tarefas/:id/dataCriacao', (req, res) => {
+    const { id } = req.params;
+    const { dataCriacao } = req.body;
     const tarefa = tarefas.find(t => t.id === parseInt(id));
     if (!tarefa) {
         return res.status(404).json({ message: 'Tarefa não encontrada' });
@@ -75,8 +92,8 @@ main.put('/tarefas/:id/dataCriacao', (req, res) =>{
 
 // Rota para editar a prioridade de uma tarefa
 main.put('/tarefas/:id/prioridade', (req, res) => {
-    const {id} = req.params;
-    const {prioridade} = req.body;
+    const { id } = req.params;
+    const { prioridade } = req.body;
     const tarefa = tarefas.find(t => t.id === parseInt(id));
     if (!tarefa) {
         return res.status(404).json({ message: 'Tarefa não encontrada' });
@@ -88,8 +105,8 @@ main.put('/tarefas/:id/prioridade', (req, res) => {
 
 
 // Rota para concluir uma tarefa
-main.patch('/tarefas/:id/concluir', (req, res) =>{
-    const {id} = req.params;
+main.patch('/tarefas/:id/concluir', (req, res) => {
+    const { id } = req.params;
     const tarefa = tarefas.find(t => t.id === parseInt(id));
     if (!tarefa) {
         return res.status(404).json({ message: 'Tarefa não encontrada' });
