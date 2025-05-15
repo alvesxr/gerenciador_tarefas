@@ -34,6 +34,7 @@ class Tarefa {
 
     toJSON() {
         return {
+            id: this.id, // Adicione esta linha
             titulo: this.titulo,
             descricao: this.descricao,
             dataCriacao: this.dataCriacao,
